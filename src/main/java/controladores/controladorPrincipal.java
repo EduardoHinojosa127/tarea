@@ -13,6 +13,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import modelos.cBaseDatos;
+import modelos.*;
+import dao.*;
+import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  *
@@ -97,6 +103,58 @@ public class controladorPrincipal extends HttpServlet {
                 request.setAttribute( "titulo","Modificar Area");
                 request.getRequestDispatcher( "/mantenimientos/editarAreas.jsp" ).forward( 
                  request,response );
+            }else if(accion.equals("listadoAlumnos")){
+                List<Alumnos> arrAlumnos = new ArrayList<Alumnos>();
+                IAlumnosDAO dao = new AlumnoDAOImpl();
+                arrAlumnos = dao.obtener();
+                request.setAttribute("arrAlumnos", arrAlumnos);
+                request.getRequestDispatcher("/mantenimientos/listadoAlumnos.jsp").forward(request, response);
+            }else if(accion.equals("NuevoEliminarAlumno")){
+                if(request.getParameter("boton").compareTo("Nuevo Registro")==0){
+                    Alumnos alumno = new Alumnos();
+                    request.setAttribute("alumno", alumno);
+                    request.setAttribute("operacion", "INSERT");
+                    request.setAttribute("titulo", "Nuevo Alumno");
+                    request.getRequestDispatcher("/mantenimientos/editarAlumnos.jsp").forward(request, response);
+                }else{
+                    String[] codigos = request.getParameterValues("xcod");
+                    IAlumnosDAO dao = new AlumnoDAOImpl();
+                    dao.eliminar(codigos);
+                    request.getRequestDispatcher("/controladorPrincipal?accion=listadoAlumnos").forward(
+                            request, response);
+                }
+            }else if (accion.compareTo("GRABAR_ALUMNO")==0){
+                if (request.getParameter("boton").compareTo("GRABAR")==0){
+                    String operacion = request.getParameter("operacion");
+                    String strDate = request.getParameter("xfec");
+                    Date xfec = Date.valueOf(strDate);
+                    Alumnos alumno = new Alumnos();
+                    alumno.setCodigo(Integer.parseInt(request.getParameter("xcod")));
+                    alumno.setNombre(request.getParameter("xnom"));
+                    alumno.setDireccion(request.getParameter("xdir"));
+                    alumno.setEmail(request.getParameter("xema"));
+                    alumno.setTelefono(request.getParameter("xtel"));
+                    alumno.setCelular(request.getParameter("xcel"));
+                    alumno.setSexo(request.getParameter("xsex"));
+                    alumno.setFec_nac(xfec);
+                    alumno.setEstado(request.getParameter("xest"));
+                    if (operacion.equals("INSERT")){
+                        IAlumnosDAO dao = new AlumnoDAOImpl();
+                        dao.resgitrar(alumno);
+                    }else{
+                        IAlumnosDAO dao = new AlumnoDAOImpl();
+                        dao.actualizar(alumno);
+                    }
+                }
+                request.getRequestDispatcher("/controladorPrincipal?accion=listadoAlumnos").forward(request, response);
+            }else if(accion.compareTo("modificarAlumno")==0){
+                String xcod = request.getParameter("xcod").trim();
+                IAlumnosDAO dao = new AlumnoDAOImpl();
+                Alumnos alumno = dao.buscar(Integer.parseInt(xcod));
+                request.setAttribute("alumno", alumno);
+                request.setAttribute("operacion", "UPDATE");
+                request.setAttribute("titulo", "Modificar Alumno");
+                request.getRequestDispatcher("/mantenimientos/editarAlumnos.jsp").forward(request, response);
             }
 
             else {
