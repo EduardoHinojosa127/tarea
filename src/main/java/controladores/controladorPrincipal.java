@@ -155,8 +155,62 @@ public class controladorPrincipal extends HttpServlet {
                 request.setAttribute("operacion", "UPDATE");
                 request.setAttribute("titulo", "Modificar Alumno");
                 request.getRequestDispatcher("/mantenimientos/editarAlumnos.jsp").forward(request, response);
+            }else if(accion.equals("listadoCursos")){
+                List<Cursos> arrCursos = new ArrayList<Cursos>();
+                ICursosDAO dao = new CursosDAOImpl();
+                arrCursos = dao.obtener();
+                request.setAttribute("arrCursos", arrCursos);
+                request.getRequestDispatcher("/mantenimientos/listadoCursos.jsp").forward(request, response);
+            }else if(accion.equals("NuevoEliminarCurso")){
+                if(request.getParameter("boton").compareTo("Nuevo Registro")==0){
+                    Cursos curso = new Cursos();
+                    request.setAttribute("curso", curso);
+                    request.setAttribute("operacion", "INSERT");
+                    request.setAttribute("titulo", "Nuevo Curso");
+                    request.getRequestDispatcher("/mantenimientos/editarCursos.jsp").forward(request, response);
+                }else{
+                    String[] codigos = request.getParameterValues("xcod");
+                    ICursosDAO dao = new CursosDAOImpl();
+                    dao.eliminar(codigos);
+                    request.getRequestDispatcher("/controladorPrincipal?accion=listadoCursos").forward(
+                            request, response);
+                }
+            }else if (accion.compareTo("GRABAR_CURSO")==0){
+                if (request.getParameter("boton").compareTo("GRABAR")==0){
+                    String operacion = request.getParameter("operacion");
+                    String strDate1 = request.getParameter("xini");
+                    String strDate2 = request.getParameter("xfin");
+                    Date xfec1 = Date.valueOf(strDate1);
+                    Date xfec2 = Date.valueOf(strDate2);
+                    Cursos curso = new Cursos();
+                    curso.setCodigo(Integer.parseInt(request.getParameter("xcod")));
+                    curso.setNombre(request.getParameter("xnom"));                
+                    curso.setCosto(Double.parseDouble(request.getParameter("xcos")));
+                    curso.setFec_ini(xfec1);
+                    curso.setFec_fin(xfec2);
+                    curso.setDuracion(Integer.parseInt(request.getParameter("xdur")));
+                    curso.setSesiones(Integer.parseInt(request.getParameter("xses")));
+                    curso.setCapacidad(Integer.parseInt(request.getParameter("xcap")));
+                    curso.setInscritos(Integer.parseInt(request.getParameter("xins")));
+                    curso.setEstado(request.getParameter("xest"));
+                    if (operacion.equals("INSERT")){
+                        ICursosDAO dao = new CursosDAOImpl();
+                        dao.resgitrar(curso);
+                    }else{
+                        ICursosDAO dao = new CursosDAOImpl();
+                        dao.actualizar(curso);
+                    }
+                }
+                request.getRequestDispatcher("/controladorPrincipal?accion=listadoCursos").forward(request, response);
+            }else if(accion.compareTo("modificarCurso")==0){
+                String xcod = request.getParameter("xcod").trim();
+                ICursosDAO dao = new CursosDAOImpl();
+                Cursos curso = dao.buscar(Integer.parseInt(xcod));
+                request.setAttribute("curso", curso);
+                request.setAttribute("operacion", "UPDATE");
+                request.setAttribute("titulo", "Modificar Curso");
+                request.getRequestDispatcher("/mantenimientos/editarCursos.jsp").forward(request, response);
             }
-
             else {
                 out.println("Accion: (" + accion + ") no reconocida...");
             }
