@@ -19,6 +19,7 @@ import java.util.List;
 import modelos.Alumnos;
 import modelos.Conexion;
 import modelos.Cursos;
+import modelos.Matriculas;
 
 /**
  *
@@ -164,6 +165,42 @@ public class MatriculaDAOImpl implements IMatriculaDAO{
         psc.setString(1, xcodc);
         psc.executeUpdate();
     }
+
+    @Override
+    public List<Matriculas> listarMatriculas(Matriculas nmatricula) {
+        Connection co = null;
+        Statement stm = null;
+        ResultSet rs = null;
+        String sql = "SELECT nro_doc,alumnos.nombre,cursos.nombre,detalles.monto,matriculas.estado\n"
+                + " FROM   test.matriculas\n"
+                + "        INNER JOIN test.alumnos \n"
+                + "           ON matriculas.codigo_alumno = alumnos.codigo\n"
+                + "		INNER JOIN test.detalles\n"
+                + "			ON matriculas.codigo = detalles.codigo_matricula\n"
+                + "		INNER JOIN test.cursos\n"
+                + "			ON detalles.codigo_curso = cursos.codigo WHERE matriculas.nro_doc LIKE'%" + nmatricula.getNro_doc() + "%'";
+        List<Matriculas> listaMatriculas = new ArrayList<Matriculas>();
+        try {
+            Conexion con = new Conexion();
+            co = con.Conectar();
+            stm = co.createStatement();
+            rs = stm.executeQuery(sql);
+            while (rs.next()) {
+                Matriculas matricula = new Matriculas();
+                matricula.setNro_doc(rs.getString(1));
+                matricula.setAlumno(rs.getString(2));
+                matricula.setCurso(rs.getString(3));
+                matricula.setMonto(rs.getDouble(4));
+                matricula.setEstado(rs.getString(5));
+                listaMatriculas.add(matricula);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error:Clase MatriculaDaoImpl, método obtener");
+        }
+        return listaMatriculas;
+    }
+
+    
 
     
 

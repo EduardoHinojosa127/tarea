@@ -283,6 +283,20 @@ public class controladorPrincipal extends HttpServlet {
                 request.setAttribute("titulo", "Modificar Curso");
                 request.getRequestDispatcher("/mantenimientos/editarCursos.jsp").forward(request, response);
             }
+            else if(accion.equals("listadoMatriculas")){
+                Matriculas matricula = new Matriculas();
+                
+                if (request.getParameter("xmat")==null){
+                    matricula.setNro_doc("");
+                }else{
+                    matricula.setNro_doc(request.getParameter("xmat"));
+                }
+                List<Matriculas> arrMatriculas = new ArrayList<Matriculas>();
+                IMatriculaDAO dao = new MatriculaDAOImpl();
+                arrMatriculas = dao.listarMatriculas(matricula);
+                request.setAttribute("arrMatriculas", arrMatriculas);
+                request.getRequestDispatcher("/mantenimientos/listadoMatriculas.jsp").forward(request, response);
+            }
             else {
                 out.println("Accion: (" + accion + ") no reconocida...");
             }
